@@ -5,7 +5,8 @@
   "main": "player.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "http-server"
+    "start": "http-server",
+    "bundle": "browserify src/main.js -o player.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,10 @@
   },
   "homepage": "https://github.com/nice-shot/VideoPlayer#readme",
   "devDependencies": {
+    "browserify": "^16.2.2",
     "http-server": "^0.11.1"
+  },
+  "dependencies": {
+    "firebase": "^5.2.0"
   }
 }
