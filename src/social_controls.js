@@ -11,8 +11,8 @@ db.settings({
     timestampsInSnapshots: true
 });
 
-// Theoritacally we could take this from the DB but we only
-// have the one movie so it's hard-coded
+// Theoritacally we could take the video ID from the DB but we only
+// have one so it's hard-coded
 const videoId = "kAIgdmnGLG5awuzlUUpB";
 const collection = "videos";
 
@@ -28,10 +28,10 @@ function SetViews(numOfViews) {
 
 function SetThumbs(thumbsUp, thumbsDown) {
     thumbsUpBtn.innerText = "thumbsUp: " + thumbsUp;
-    thumbsDownBtn.innerText = "thumbsUp: " + thumbsDown;
+    thumbsDownBtn.innerText = "thumbsDown: " + thumbsDown;
 }
 
-// Reference firebase document
+// Reference firestore document
 let videoRef = db.collection(collection).doc(videoId);
 
 // Promise functions
@@ -74,8 +74,8 @@ function IncreaseThumbsDownCount(videoData) {
 // Set button actions
 
 thumbsUpBtn.onclick = () => {
+    // Get latest data before updating it
     videoRef.get()
-        // Get latest data before updating it
         .then(ExtractVideoData)
         .then(IncreaseThumbsUpCount)
         .then(UpdateSocialView)
@@ -109,7 +109,7 @@ videoRef.get()
     .then(IncreaseViewsCount)
     .then(UpdateSocialView)
     .catch((error) => {
-        // TODO: Change views to be not responsive
+        // Should probably change views to be unresponsive
         console.error("Problem getting social data");
         console.error(error);
     })

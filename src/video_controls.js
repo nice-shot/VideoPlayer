@@ -1,9 +1,13 @@
+// Used for duration formatting
 const luxon = require("luxon");
 
+// Setup html elements
 const videoElem = document.getElementsByTagName("video")[0];
 const playPauseBtn = document.getElementById("playPause");
 const currentTimeElem = document.getElementsByClassName("currentTime")[0];
 
+
+// Utility functions
 function PlayPause() {
     if (videoElem.paused) {
         videoElem.play();
@@ -17,5 +21,7 @@ function UpdateTimeDisplay() {
     currentTimeElem.innerText = duration.toFormat("mm:ss");
 }
 
+
+// Set buttons
 playPauseBtn.onclick = PlayPause;
 videoElem.ontimeupdate = UpdateTimeDisplay;
