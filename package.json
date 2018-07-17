@@ -1,0 +1,18 @@
+{
+  "name": "ekohomework",
+  "version": "1.0.0",
+  "description": "Javascript video player for html5",
+  "main": "player.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nice-shot/VideoPlayer.git"
+  },
+  "author": "nice-shot",
+  "bugs": {
+    "url": "https://github.com/nice-shot/VideoPlayer/issues"
+  },
+  "homepage": "https://github.com/nice-shot/VideoPlayer#readme"
+}
