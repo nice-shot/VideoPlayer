@@ -71,3 +71,6 @@ typings/
 
 # Serverless directories
 .serverless
+
+# Authentication data
+src/firebase_config.json

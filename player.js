@@ -30126,16 +30126,21 @@ function hasOwnProperty(obj, prop) {
 })(typeof self !== 'undefined' ? self : this);
 
 },{}],17:[function(require,module,exports){
+module.exports={
+    "apiKey": "AIzaSyAg00Gp2H40RF6EHSYm45BPvSYMhxn01iQ",
+    "authDomain": "videoplayer-ee996.firebaseapp.com",
+    "databaseURL": "https://videoplayer-ee996.firebaseio.com",
+    "projectId": "videoplayer-ee996",
+    "storageBucket": "",
+    "messagingSenderId": "711006215680"
+}
+
+},{}],18:[function(require,module,exports){
 const firebase = require("firebase/app");
 require("firebase/firestore");
-const app = firebase.initializeApp({
-    apiKey: "AIzaSyAg00Gp2H40RF6EHSYm45BPvSYMhxn01iQ",
-    authDomain: "videoplayer-ee996.firebaseapp.com",
-    databaseURL: "https://videoplayer-ee996.firebaseio.com",
-    projectId: "videoplayer-ee996",
-    storageBucket: "",
-    messagingSenderId: "711006215680"
-});
+// Avoid placing authentication data in git
+const firebaseConfig = require("./firebase_config.json");
+const app = firebase.initializeApp(firebaseConfig);
 
 const viewsDisplay = require("./views_display.js");
 
@@ -30160,7 +30165,7 @@ db.collection("videos").doc(videoId).get().then((video) => {
 
 require("./video_controls");
 
-},{"./video_controls":18,"./views_display.js":19,"firebase/app":7,"firebase/firestore":8}],18:[function(require,module,exports){
+},{"./firebase_config.json":17,"./video_controls":19,"./views_display.js":20,"firebase/app":7,"firebase/firestore":8}],19:[function(require,module,exports){
 const luxon = require("luxon");
 
 const videoElem = document.getElementsByTagName("video")[0];
@@ -30183,11 +30188,11 @@ function UpdateTimeDisplay() {
 playPauseBtn.onclick = PlayPause;
 videoElem.ontimeupdate = UpdateTimeDisplay;
 
-},{"luxon":10}],19:[function(require,module,exports){
+},{"luxon":10}],20:[function(require,module,exports){
 const viewsElement = document.getElementsByClassName("views")[0];
 module.exports = {
     SetViews: (numOfViews) => {
             viewsElement.innerText = numOfViews;
     }
 }
-},{}]},{},[17]);
+},{}]},{},[18]);

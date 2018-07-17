@@ -1,13 +1,8 @@
 const firebase = require("firebase/app");
 require("firebase/firestore");
-const app = firebase.initializeApp({
-    apiKey: "AIzaSyAg00Gp2H40RF6EHSYm45BPvSYMhxn01iQ",
-    authDomain: "videoplayer-ee996.firebaseapp.com",
-    databaseURL: "https://videoplayer-ee996.firebaseio.com",
-    projectId: "videoplayer-ee996",
-    storageBucket: "",
-    messagingSenderId: "711006215680"
-});
+// Avoid placing authentication data in git
+const firebaseConfig = require("./firebase_config.json");
+const app = firebase.initializeApp(firebaseConfig);
 
 const viewsDisplay = require("./views_display.js");
 
