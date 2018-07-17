@@ -30136,25 +30136,56 @@ module.exports={
 }
 
 },{}],18:[function(require,module,exports){
+require("./video_controls");
+require("./social_controls");
+
+},{"./social_controls":19,"./video_controls":20}],19:[function(require,module,exports){
+// Firebase initialization
 const firebase = require("firebase/app");
 require("firebase/firestore");
-// Avoid placing authentication data in git
-const firebaseConfig = require("./firebase_config.json");
-const app = firebase.initializeApp(firebaseConfig);
+const config = require("./firebase_config.json");
 
-const viewsDisplay = require("./views_display.js");
-
+const app = firebase.initializeApp(config);
 const db = firebase.firestore();
+
+// Used to avoid a warning by firebase
 db.settings({
     timestampsInSnapshots: true
 });
 
+// Theoritacally we could take this from the DB but we only
+// have the one movie so it's hard-coded
 const videoId = "kAIgdmnGLG5awuzlUUpB";
+const collection = "videos";
 
-db.collection("videos").doc(videoId).get().then((video) => {
+// Prepare html elements
+const viewsElement = document.getElementsByClassName("views")[0];
+const thumbsUpBtn = document.getElementById("thumbsUp");
+const thumbsDownBtn = document.getElementById("thumbsDown");
+
+let videoRef = db.collection(collection).doc(videoId);
+
+// Utility functions
+function SetViews(numOfViews) {
+    viewsElement.innerText = numOfViews;
+}
+
+function SetThumbs(thumbsUp, thumbsDown) {
+    thumbsUpBtn.innerText = "thumbsUp: " + thumbsUp;
+    thumbsDownBtn.innerText = "thumbsUp: " + thumbsDown;
+}
+
+// Set the initial values to '...' to indicate loading
+SetViews("?");
+SetThumbs("?", "?");
+
+
+
+videoRef.get().then((video) => {
     if (video.exists) {
         videoData = video.data();
-        viewsDisplay.SetViews(videoData.views);
+        SetViews(videoData.views);
+        SetThumbs(videoData.likes, videoData.dislikes);
     } else {
         console.error("video not found");
     }
@@ -30163,9 +30194,25 @@ db.collection("videos").doc(videoId).get().then((video) => {
     console.error(error);
 });
 
-require("./video_controls");
+thumbsUpBtn.onclick = () => {
+    videoRef.get().then((video) => {
+        if (video.exists) {
+            videoData = video.data();
+            videoRef.update({likes: videoData.likes + 1})
+                    .then(() => {
+                       SetThumbs(videoData.likes + 1, videoData.dislikes)
+                    })
+            ;
+        } else {
+            console.error("video not found");
+        }
+    }).catch((error) => {
+        console.error("couldn't connect to video");
+        console.error(error);
+    });
+};
 
-},{"./firebase_config.json":17,"./video_controls":19,"./views_display.js":20,"firebase/app":7,"firebase/firestore":8}],19:[function(require,module,exports){
+},{"./firebase_config.json":17,"firebase/app":7,"firebase/firestore":8}],20:[function(require,module,exports){
 const luxon = require("luxon");
 
 const videoElem = document.getElementsByTagName("video")[0];
@@ -30188,11 +30235,4 @@ function UpdateTimeDisplay() {
 playPauseBtn.onclick = PlayPause;
 videoElem.ontimeupdate = UpdateTimeDisplay;
 
-},{"luxon":10}],20:[function(require,module,exports){
-const viewsElement = document.getElementsByClassName("views")[0];
-module.exports = {
-    SetViews: (numOfViews) => {
-            viewsElement.innerText = numOfViews;
-    }
-}
-},{}]},{},[18]);
+},{"luxon":10}]},{},[18]);
