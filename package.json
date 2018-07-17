@@ -4,7 +4,8 @@
   "description": "Javascript video player for html5",
   "main": "player.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server"
   },
   "repository": {
     "type": "git",
@@ -14,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/nice-shot/VideoPlayer/issues"
   },
-  "homepage": "https://github.com/nice-shot/VideoPlayer#readme"
+  "homepage": "https://github.com/nice-shot/VideoPlayer#readme",
+  "devDependencies": {
+    "http-server": "^0.11.1"
+  }
 }
