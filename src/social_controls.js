@@ -17,15 +17,13 @@ const videoId = "kAIgdmnGLG5awuzlUUpB";
 const collection = "videos";
 
 // Prepare html elements
-const viewsElement = document.getElementsByClassName("views")[0];
+const viewsElem = document.getElementsByClassName("views")[0];
 const thumbsUpBtn = document.getElementById("thumbsUp");
 const thumbsDownBtn = document.getElementById("thumbsDown");
 
-let videoRef = db.collection(collection).doc(videoId);
-
 // Utility functions
 function SetViews(numOfViews) {
-    viewsElement.innerText = numOfViews;
+    viewsElem.innerText = numOfViews;
 }
 
 function SetThumbs(thumbsUp, thumbsDown) {
@@ -33,39 +31,87 @@ function SetThumbs(thumbsUp, thumbsDown) {
     thumbsDownBtn.innerText = "thumbsUp: " + thumbsDown;
 }
 
-// Set the initial values to '...' to indicate loading
+// Reference firebase document
+let videoRef = db.collection(collection).doc(videoId);
+
+// Promise functions
+function ExtractVideoData(videoDoc) {
+    if (videoDoc.exists) {
+        return Promise.resolve(videoDoc.data());
+    }
+    return Promise.reject("Video not found in DB");
+}
+
+function UpdateSocialView(videoData) {
+    SetViews(videoData.views);
+    SetThumbs(videoData.likes, videoData.dislikes);
+    // Each function returns the video data to allow aggregation
+    return Promise.resolve(videoData);
+}
+
+function IncreaseViewsCount(videoData) {
+    // Don't double check the data in firestore to reduce extra requests
+    videoData.views += 1;
+    return videoRef.update({views: videoData.views})
+                   .then(() => Promise.resolve(videoData))
+    ;
+}
+
+function IncreaseThumbsUpCount(videoData) {
+    videoData.likes += 1;
+    return videoRef.update({likes: videoData.likes})
+                   .then(() => Promise.resolve(videoData))
+    ;
+}
+
+function IncreaseThumbsDownCount(videoData) {
+    videoData.dislikes += 1;
+    return videoRef.update({dislikes: videoData.dislikes})
+                   .then(() => Promise.resolve(videoData))
+    ;
+}
+
+// Set button actions
+
+thumbsUpBtn.onclick = () => {
+    videoRef.get()
+        // Get latest data before updating it
+        .then(ExtractVideoData)
+        .then(IncreaseThumbsUpCount)
+        .then(UpdateSocialView)
+        .catch((error) => {
+            console.error("Couldn't send thumbs up");
+            console.error(error);
+        })
+    ;
+};
+
+thumbsDownBtn.onclick = () => {
+    videoRef.get()
+        .then(ExtractVideoData)
+        .then(IncreaseThumbsDownCount)
+        .then(UpdateSocialView)
+        .catch((error) => {
+            console.error("Couldn't send thumbs down");
+            console.error(error);
+        })
+    ;
+};
+
+// Set the initial values to '?' to indicate loading
 SetViews("?");
 SetThumbs("?", "?");
 
-
-
-videoRef.get().then((video) => {
-    if (video.exists) {
-        videoData = video.data();
-        SetViews(videoData.views);
-        SetThumbs(videoData.likes, videoData.dislikes);
-    } else {
-        console.error("video not found");
-    }
-}).catch((error) => {
-    console.error("couldn't connect to video");
-    console.error(error);
-});
-
-thumbsUpBtn.onclick = () => {
-    videoRef.get().then((video) => {
-        if (video.exists) {
-            videoData = video.data();
-            videoRef.update({likes: videoData.likes + 1})
-                    .then(() => {
-                       SetThumbs(videoData.likes + 1, videoData.dislikes)
-                    })
-            ;
-        } else {
-            console.error("video not found");
-        }
-    }).catch((error) => {
-        console.error("couldn't connect to video");
+// Check social info, update number of views and display on page
+videoRef.get()
+    .then(ExtractVideoData)
+    // Update immidiatly upon page hit - no validation of actual video viewing
+    .then(IncreaseViewsCount)
+    .then(UpdateSocialView)
+    .catch((error) => {
+        // TODO: Change views to be not responsive
+        console.error("Problem getting social data");
         console.error(error);
-    });
-};
+    })
+;
+
