@@ -30164,6 +30164,13 @@ const collection = "videos";
 // Reference firestore document
 let videoRef = db.collection(collection).doc(videoId);
 
+// Used to toggle thumbs display
+let clickedThumbsUp = false;
+let clickedThumbsDown = false;
+
+// Used to prevent multiple clicks on the thumbs from effecting the DB
+let thumbsUpdateLock = false;
+
 // Promise functions
 function ExtractVideoData(videoDoc) {
     if (videoDoc.exists) {
@@ -30179,6 +30186,14 @@ function UpdateSocialView(videoData) {
     return Promise.resolve(videoData);
 }
 
+function UpdateThumbsIcons() {
+    socialDisplay.ToggleThumbsUp(clickedThumbsUp);
+    socialDisplay.ToggleThumbsDown(clickedThumbsDown);
+    // It's ok to click the thumbs again
+    thumbsUpdateLock = false;
+    return Promise.resolve();
+}
+
 function IncreaseViewsCount(videoData) {
     // Don't double check the data in firestore to reduce extra requests
     videoData.views += 1;
@@ -30191,37 +30206,37 @@ function IncreaseViewsCount(videoData) {
 function ChangeThumbsCount(increase=true, thumbsUp=true) {
     let numToAdd = increase ? 1 : -1;
     let key = thumbsUp ? "likes" : "dislikes";
-    return function (videoData) {
+    return (videoData) => {
         videoData[key] += numToAdd;
-        return videoRef.update({likes: videoData.likes})
+
+        let updateObj = {};
+        updateObj[key] = videoData[key];
+
+        return videoRef.update(updateObj)
                        .then(() => Promise.resolve(videoData))
         ;
     };
 }
 
-
-function IncreaseThumbsUpCount(videoData) {
-    videoData.likes += 1;
-    return videoRef.update({likes: videoData.likes})
-                   .then(() => Promise.resolve(videoData))
-    ;
-}
-
-function IncreaseThumbsDownCount(videoData) {
-    videoData.dislikes += 1;
-    return videoRef.update({dislikes: videoData.dislikes})
-                   .then(() => Promise.resolve(videoData))
-    ;
-}
-
-
 // Onclick functions
 function ThumbsUpOnClick() {
+    if (thumbsUpdateLock) {
+        return;
+    }
+
+    thumbsUpdateLock = true;
+
+    let increase = true;
+    if (clickedThumbsUp) {
+        increase = false;
+    }
     // Get latest data before updating it
     videoRef.get()
         .then(ExtractVideoData)
-        .then(IncreaseThumbsUpCount)
+        .then(ChangeThumbsCount(increase, true))
         .then(UpdateSocialView)
+        .then(() => clickedThumbsUp = !clickedThumbsUp)
+        .then(UpdateThumbsIcons)
         .catch((error) => {
             console.error("Couldn't send thumbs up");
             console.error(error);
@@ -30230,10 +30245,24 @@ function ThumbsUpOnClick() {
 }
 
 function ThumbsDownOnClick() {
+    // Very similar
+    if (thumbsUpdateLock) {
+        return;
+    }
+
+    thumbsUpdateLock = true;
+
+    let increase = true;
+    if (clickedThumbsDown) {
+        increase = false;
+    }
+
     videoRef.get()
         .then(ExtractVideoData)
-        .then(IncreaseThumbsDownCount)
+        .then(ChangeThumbsCount(increase, false))
         .then(UpdateSocialView)
+        .then(() => clickedThumbsDown = !clickedThumbsDown)
+        .then(UpdateThumbsIcons)
         .catch((error) => {
             console.error("Couldn't send thumbs down");
             console.error(error);
