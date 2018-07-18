@@ -9,7 +9,9 @@
         <source src="http://clips.vorwaerts-gmbh.de/VfE.ogv"       type="video/ogg"  /><!-- Firefox3.6+ / Opera 10.5+ -->
     </video>
     <div class="controls">
-        <button id="playPause">Play/Pause</button>
+        <button id="playPause">
+            <img src="images/pause.png"></img>
+        </button>
         <div class="timeContainer">
             <span class="currentTimeCaption">Current time:</span>
             <span class="currentTime">0:00</span>
@@ -21,8 +23,14 @@
             <span class="views">0</span>
         </div>
         <div class="voteContainer">
-            <button id="thumbsUp">thumbsUp: 0</button>
-            <button id="thumbsDown">thumbsDown: 0</button>
+            <button id="thumbsUp">
+                <img src="images/thumbs_up.png"></img>
+                <span>0</span>
+            </button>
+            <button id="thumbsDown">
+                <img src="images/thumbs_down.png"></img>
+                <span>0</span>
+            </button>
         </div>
     </div>
     <script type="text/javascript" src="player.js"></script>
