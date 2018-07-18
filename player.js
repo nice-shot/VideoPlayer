@@ -30201,6 +30201,7 @@ function ChangeThumbsCount(increase=true, isThumbsUp=true) {
     return (videoData) => {
         videoData[key] += numToAdd;
 
+        // Avoid updating unrelated fields
         let updateObj = {};
         updateObj[key] = videoData[key];
 
@@ -30228,7 +30229,7 @@ function CreateThumbsOnClick(isThumbsUp=true) {
         }
         thumbsUpdateLock = true;
 
-        // Should we increase or decrease the thumbs up/down number
+        // Should we increase or decrease the thumbs up/down number?
         let increase = true;
         if ((isThumbsUp && clickedThumbsUp)
             || (!isThumbsUp && clickedThumbsDown)) {
@@ -30268,7 +30269,7 @@ socialDisplay.SetThumbs("?", "?");
 // Check social info, update number of views and display on page
 videoRef.get()
     .then(ExtractVideoData)
-    // Update immidiatly upon page hit - no validation of actual video viewing
+    // Update immediately upon page hit - no validation of actual video viewing
     .then(IncreaseViewsCount)
     .then(UpdateSocialView)
     .catch((error) => {
