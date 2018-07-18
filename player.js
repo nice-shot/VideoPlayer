@@ -30186,14 +30186,6 @@ function UpdateSocialView(videoData) {
     return Promise.resolve(videoData);
 }
 
-function UpdateThumbsIcons() {
-    socialDisplay.ToggleThumbsUp(clickedThumbsUp);
-    socialDisplay.ToggleThumbsDown(clickedThumbsDown);
-    // It's ok to click the thumbs again
-    thumbsUpdateLock = false;
-    return Promise.resolve();
-}
-
 function IncreaseViewsCount(videoData) {
     // Don't double check the data in firestore to reduce extra requests
     videoData.views += 1;
@@ -30203,9 +30195,9 @@ function IncreaseViewsCount(videoData) {
 }
 
 // Returns a promise function that changes the thumbs count
-function ChangeThumbsCount(increase=true, thumbsUp=true) {
+function ChangeThumbsCount(increase=true, isThumbsUp=true) {
     let numToAdd = increase ? 1 : -1;
-    let key = thumbsUp ? "likes" : "dislikes";
+    let key = isThumbsUp ? "likes" : "dislikes";
     return (videoData) => {
         videoData[key] += numToAdd;
 
@@ -30218,61 +30210,56 @@ function ChangeThumbsCount(increase=true, thumbsUp=true) {
     };
 }
 
-// Onclick functions
-function ThumbsUpOnClick() {
-    if (thumbsUpdateLock) {
-        return;
-    }
+function UpdateThumbsIcons() {
+    socialDisplay.ToggleThumbsUp(clickedThumbsUp);
+    socialDisplay.ToggleThumbsDown(clickedThumbsDown);
 
-    thumbsUpdateLock = true;
-
-    let increase = true;
-    if (clickedThumbsUp) {
-        increase = false;
-    }
-    // Get latest data before updating it
-    videoRef.get()
-        .then(ExtractVideoData)
-        .then(ChangeThumbsCount(increase, true))
-        .then(UpdateSocialView)
-        .then(() => clickedThumbsUp = !clickedThumbsUp)
-        .then(UpdateThumbsIcons)
-        .catch((error) => {
-            console.error("Couldn't send thumbs up");
-            console.error(error);
-        })
-    ;
+    // It's ok to click the thumbs again
+    thumbsUpdateLock = false;
+    return Promise.resolve();
 }
 
-function ThumbsDownOnClick() {
-    // Very similar
-    if (thumbsUpdateLock) {
-        return;
-    }
+// Thumbs on click functions are very similar so we're using this closure
+function CreateThumbsOnClick(isThumbsUp=true) {
+    return () => {
+        // Prevents changing thumbs while waiting for DB
+        if (thumbsUpdateLock) {
+            return;
+        }
+        thumbsUpdateLock = true;
 
-    thumbsUpdateLock = true;
+        // Should we increase or decrease the thumbs up/down number
+        let increase = true;
+        if ((isThumbsUp && clickedThumbsUp)
+            || (!isThumbsUp && clickedThumbsDown)) {
+            increase = false;
+        }
 
-    let increase = true;
-    if (clickedThumbsDown) {
-        increase = false;
-    }
-
-    videoRef.get()
-        .then(ExtractVideoData)
-        .then(ChangeThumbsCount(increase, false))
-        .then(UpdateSocialView)
-        .then(() => clickedThumbsDown = !clickedThumbsDown)
-        .then(UpdateThumbsIcons)
-        .catch((error) => {
-            console.error("Couldn't send thumbs down");
-            console.error(error);
+        // Get latest data before updating it
+        videoRef.get()
+            .then(ExtractVideoData)
+            .then(ChangeThumbsCount(increase, isThumbsUp))
+            .then(UpdateSocialView)
+            .then(() => {
+                // Change thumbs click booleans
+                if (isThumbsUp) {
+                    clickedThumbsUp = !clickedThumbsUp;
+                } else {
+                    clickedThumbsDown = !clickedThumbsDown;
+                }
+            })
+            .then(UpdateThumbsIcons)
+            .catch((error) => {
+                let thumbDirection = isThumbsUp ? "up" : "down";
+                console.error("Couldn't send thumbs " + thumbDirection);
+                console.error(error);
         })
-    ;
+    };
 }
-
 
 // Set button actions
-socialDisplay.SetThumbsClickFunctions(ThumbsUpOnClick, ThumbsDownOnClick);
+socialDisplay.SetThumbsClickFunctions(CreateThumbsOnClick(true),
+                                      CreateThumbsOnClick(false));
 
 // Set the initial values to '?' to indicate loading
 socialDisplay.SetViews("?");
@@ -30285,7 +30272,6 @@ videoRef.get()
     .then(IncreaseViewsCount)
     .then(UpdateSocialView)
     .catch((error) => {
-        // Should probably change views to be unresponsive
         console.error("Problem getting social data");
         console.error(error);
     })
