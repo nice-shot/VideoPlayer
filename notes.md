@@ -1,5 +1,19 @@
 # Some Notes
 
+## How to run
+
+Install required packages:
+```
+npm install
+```
+
+Run the server:
+```
+npm start
+```
+
+Browse to http://localhost:8080
+
 ## Firestore
 
 The database is built in a way to allow multiple videos. There is one
@@ -28,3 +42,13 @@ I chose not to use a UI framework like bootstrap or a JS framework like react.
 This means that it might look and run differently on different browsers and
 devices. I wanted to focus on the main task, so while it should work on most
 modern browsers, it will probably work best on a computer running chrome.
+
+## Thumbs functionality
+I assumed the thumbs up/down should work as a toggle so users could downvote
+the same video more than once.
+
+## Errors
+Right now problems with the video playback or the social functionality are not
+displayed to the user. I figured it was beyond the scope of this exercise and
+decided to just add console.error messages for firebase issues and keep the
+social details as '?' if no data is available.
