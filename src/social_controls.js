@@ -27,8 +27,10 @@ function SetViews(numOfViews) {
 }
 
 function SetThumbs(thumbsUp, thumbsDown) {
-    thumbsUpBtn.innerText = "thumbsUp: " + thumbsUp;
-    thumbsDownBtn.innerText = "thumbsDown: " + thumbsDown;
+    thumbsUpBtn.getElementsByTagName("span")[0].innerText = thumbsUp;
+    thumbsDownBtn.getElementsByTagName("span")[0].innerText = thumbsDown;
+    // thumbsUpBtn.innerText = "thumbsUp: " + thumbsUp;
+    // thumbsDownBtn.innerText = "thumbsDown: " + thumbsDown;
 }
 
 // Reference firestore document
