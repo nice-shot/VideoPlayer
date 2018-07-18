@@ -44,8 +44,8 @@ devices. I wanted to focus on the main task, so while it should work on most
 modern browsers, it will probably work best on a computer running chrome.
 
 ## Thumbs functionality
-I assumed the thumbs up/down should work as a toggle so users could downvote
-the same video more than once.
+I assumed the thumbs up/down should work as a toggle so users could not vote
+for the same video more than once.
 
 ## Errors
 Right now problems with the video playback or the social functionality are not
