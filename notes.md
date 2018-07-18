@@ -25,7 +25,6 @@ counters, we would need to change the structure a bit and add distributed
 counters as explained here:
 https://firebase.google.com/docs/firestore/solutions/counters
 
-
 ## Security
 
 Right now the client can only see and update the specific document for this
@@ -44,10 +43,12 @@ devices. I wanted to focus on the main task, so while it should work on most
 modern browsers, it will probably work best on a computer running chrome.
 
 ## Thumbs functionality
+
 I assumed the thumbs up/down should work as a toggle so users could not vote
 for the same video more than once.
 
 ## Errors
+
 Right now problems with the video playback or the social functionality are not
 displayed to the user. I figured it was beyond the scope of this exercise and
 decided to just add console.error messages for firebase issues and keep the
