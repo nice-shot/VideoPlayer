@@ -11,6 +11,7 @@ const thumbsUpImgSrc = "images/thumbs_up.png"
 const thumbsDownImgSrc = "images/thumbs_down.png"
 
 function ClickedSrc(imageSrc) {
+    // The 'clicked' images have the same name with the _clicked suffix
     return imageSrc.substring(0, imageSrc.length-4) + "_clicked.png";
 }
 
