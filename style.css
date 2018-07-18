@@ -4,7 +4,6 @@ video, .controls, .social{
     margin: 1rem auto;
 }
 
-
 .viewsContainer{
     float: left;
 }
@@ -29,7 +28,7 @@ button img {
 
 button img:hover {
     /* Make button grey on hover */
-    filter:contrast(0);
+    filter: invert(70%);
 }
 
 
