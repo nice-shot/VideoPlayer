@@ -30139,7 +30139,10 @@ module.exports={
 require("./video_controls");
 require("./social_controls");
 
-},{"./social_controls":19,"./video_controls":20}],19:[function(require,module,exports){
+},{"./social_controls":19,"./video_controls":21}],19:[function(require,module,exports){
+// Functions for changing the html page
+const socialDisplay = require("./social_display");
+
 // Firebase initialization
 const firebase = require("firebase/app");
 require("firebase/firestore");
@@ -30158,23 +30161,6 @@ db.settings({
 const videoId = "kAIgdmnGLG5awuzlUUpB";
 const collection = "videos";
 
-// Prepare html elements
-const viewsElem = document.getElementsByClassName("views")[0];
-const thumbsUpBtn = document.getElementById("thumbsUp");
-const thumbsDownBtn = document.getElementById("thumbsDown");
-
-// Utility functions
-function SetViews(numOfViews) {
-    viewsElem.innerText = numOfViews;
-}
-
-function SetThumbs(thumbsUp, thumbsDown) {
-    thumbsUpBtn.getElementsByTagName("span")[0].innerText = thumbsUp;
-    thumbsDownBtn.getElementsByTagName("span")[0].innerText = thumbsDown;
-    // thumbsUpBtn.innerText = "thumbsUp: " + thumbsUp;
-    // thumbsDownBtn.innerText = "thumbsDown: " + thumbsDown;
-}
-
 // Reference firestore document
 let videoRef = db.collection(collection).doc(videoId);
 
@@ -30187,8 +30173,8 @@ function ExtractVideoData(videoDoc) {
 }
 
 function UpdateSocialView(videoData) {
-    SetViews(videoData.views);
-    SetThumbs(videoData.likes, videoData.dislikes);
+    socialDisplay.SetViews(videoData.views);
+    socialDisplay.SetThumbs(videoData.likes, videoData.dislikes);
     // Each function returns the video data to allow aggregation
     return Promise.resolve(videoData);
 }
@@ -30200,6 +30186,19 @@ function IncreaseViewsCount(videoData) {
                    .then(() => Promise.resolve(videoData))
     ;
 }
+
+// Returns a promise function that changes the thumbs count
+function ChangeThumbsCount(increase=true, thumbsUp=true) {
+    let numToAdd = increase ? 1 : -1;
+    let key = thumbsUp ? "likes" : "dislikes";
+    return function (videoData) {
+        videoData[key] += numToAdd;
+        return videoRef.update({likes: videoData.likes})
+                       .then(() => Promise.resolve(videoData))
+        ;
+    };
+}
+
 
 function IncreaseThumbsUpCount(videoData) {
     videoData.likes += 1;
@@ -30215,9 +30214,9 @@ function IncreaseThumbsDownCount(videoData) {
     ;
 }
 
-// Set button actions
 
-thumbsUpBtn.onclick = () => {
+// Onclick functions
+function ThumbsUpOnClick() {
     // Get latest data before updating it
     videoRef.get()
         .then(ExtractVideoData)
@@ -30228,9 +30227,9 @@ thumbsUpBtn.onclick = () => {
             console.error(error);
         })
     ;
-};
+}
 
-thumbsDownBtn.onclick = () => {
+function ThumbsDownOnClick() {
     videoRef.get()
         .then(ExtractVideoData)
         .then(IncreaseThumbsDownCount)
@@ -30240,11 +30239,15 @@ thumbsDownBtn.onclick = () => {
             console.error(error);
         })
     ;
-};
+}
+
+
+// Set button actions
+socialDisplay.SetThumbsClickFunctions(ThumbsUpOnClick, ThumbsDownOnClick);
 
 // Set the initial values to '?' to indicate loading
-SetViews("?");
-SetThumbs("?", "?");
+socialDisplay.SetViews("?");
+socialDisplay.SetThumbs("?", "?");
 
 // Check social info, update number of views and display on page
 videoRef.get()
@@ -30260,7 +30263,57 @@ videoRef.get()
 ;
 
 
-},{"./firebase_config.json":17,"firebase/app":7,"firebase/firestore":8}],20:[function(require,module,exports){
+},{"./firebase_config.json":17,"./social_display":20,"firebase/app":7,"firebase/firestore":8}],20:[function(require,module,exports){
+// Utility functions to help separate view from logic
+
+// Prepare html elements
+const viewsElem = document.getElementsByClassName("views")[0];
+const thumbsUpBtn = document.getElementById("thumbsUp");
+const thumbsDownBtn = document.getElementById("thumbsDown");
+const thumbsUpImg = thumbsUpBtn.getElementsByTagName("img")[0];
+const thumbsDownImg = thumbsDownBtn.getElementsByTagName("img")[0];
+
+const thumbsUpImgSrc = "images/thumbs_up.png"
+const thumbsDownImgSrc = "images/thumbs_down.png"
+
+function ClickedSrc(imageSrc) {
+    return imageSrc.substring(0, imageSrc.length-4) + "_clicked.png";
+}
+
+module.exports = {
+    SetViews: (numOfViews) => {
+        viewsElem.innerText = numOfViews;
+    },
+
+    SetThumbs: (thumbsUp, thumbsDown) => {
+        thumbsUpBtn.getElementsByTagName("span")[0].innerText = thumbsUp;
+        thumbsDownBtn.getElementsByTagName("span")[0].innerText = thumbsDown;
+    },
+
+    ToggleThumbsUp: (clicked) => {
+        if (clicked) {
+            thumbsUpImg.src = ClickedSrc(thumbsUpImgSrc);
+        } else {
+            thumbsUpImg.src = thumbsUpImgSrc;
+        }
+    },
+
+    ToggleThumbsDown: (clicked) => {
+        if (clicked) {
+            thumbsDownImg.src = ClickedSrc(thumbsDownImgSrc);
+        } else {
+            thumbsDownImg.src = thumbsDownImgSrc;
+        }
+    },
+
+    SetThumbsClickFunctions: (upClickFunction, downClickFunction) => {
+        thumbsUpBtn.onclick = upClickFunction;
+        thumbsDownBtn.onclick = downClickFunction;
+    }
+
+}
+
+},{}],21:[function(require,module,exports){
 // Used for duration formatting
 const luxon = require("luxon");
 
